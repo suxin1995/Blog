@@ -64,17 +64,17 @@
 
 - 缩放前白屏检测：
 
-![img](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3e2af74fcff2463a88eee4bd460aa2cf~tplv-k3u1fbpfcp-watermark.image)
+![img](src/beforeadd.jpg)
 
-![img](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/991d4356fd0e47b682e6c165d72557ec~tplv-k3u1fbpfcp-watermark.image)
+![img](src/beforeadd2.jpg)
 
 ​		耗时20ms
 
 - 缩放后白屏检测：
 
-![img](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d63a6dc7144346ca98da8c1157d7d629~tplv-k3u1fbpfcp-watermark.image)
+![img](src/afteradd.jpg)
 
-![img](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e3b8966d72154dba9327be87a075b554~tplv-k3u1fbpfcp-watermark.image)
+![img](src/afteradd2.jpg)
 
 ​		耗时13ms
 
