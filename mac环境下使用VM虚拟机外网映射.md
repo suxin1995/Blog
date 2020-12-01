@@ -31,3 +31,14 @@
 > ssh -p 8001 root@172.17.15.12
 
 ​	输入密码后成功连接。
+
+
+
+sqoop list-databases --connect jdbc:postgresql:122.227.226.138:7007 --username bigodata --password B1g0pgsql
+
+
+
+tar -cv * | docker exec -i gpadmin tar x -C /home/gpadmin
+
+
+
