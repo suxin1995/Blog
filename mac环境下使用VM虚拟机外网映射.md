@@ -1,4 +1,4 @@
-
+# mac 环境下使用VMware fusion 搭建虚拟机外网映射
 
 ​	上节使用VMware fusion 配置网络，成功将本地虚拟机与外网通信。NAT模式相当于形成一个虚拟局域网VLAN。虽然此时可以对外通信，但nat对外隐藏了内网，当使用外网环境去触达本地虚拟机会失败。此时可需要配置外网映射解决问题。
 
@@ -24,8 +24,6 @@
 
 ​	保存退出，重启虚拟机。
 
-​	
-
 ​	终端查看当前mac本机IP为172.17.15.12。故外网环境下可通过命令直连本地虚拟机：
 
 > ssh -p 8001 root@172.17.15.12
@@ -33,12 +31,6 @@
 ​	输入密码后成功连接。
 
 
-
-sqoop list-databases --connect jdbc:postgresql:122.227.226.138:7007 --username bigodata --password B1g0pgsql
-
-
-
-tar -cv * | docker exec -i gpadmin tar x -C /home/gpadmin
 
 
 

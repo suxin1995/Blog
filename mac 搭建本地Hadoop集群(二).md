@@ -1,22 +1,24 @@
-# mac 搭建本地Hadoop集群	(二)
+# mac 搭建Hadoop+Hive集群	(二)
 
-本地环境：
+前置环境：
 
-- jdk-8u181-linux-x64.tar.gz
-- Royal TSX  下载链接[🔗](https://www.royalapps.com/ts/mac/download)
-- Hadoop 3.3.0 下载链接[🔗](http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-3.3.0/) 
+​	已在前文配置完成多台可免密登陆相互通信的集群机器
 
-​	
+### Hadoop安装
 
-jdk-8u181-linux-x64.tar.gz和hadoop-2.7.6.tar.gz 
+##### 上传并解压
 
+​	当前使用版本：hadoop-2.7.3
 
+​	cd 到资源路径解压：
 
-配置三台可免密登陆相互通信的集群机器后，上传解压hadoop-2.7.3 版本
+```shell
+tar zxvf hadoop-2.7.3.tar.gz
+```
 
-> tar -zxvf hadoop-2.7.3.tar.gz
+ 	解压完成后进入路径  hadoop-2.7.3/etc/hadoop
 
-  解压完成后进入路径  hadoop-2.7.3/etc/hadoop
+##### 修改配置文件
 
 1. 修改core-site.xml
 
@@ -31,8 +33,6 @@ jdk-8u181-linux-x64.tar.gz和hadoop-2.7.6.tar.gz
         <value>/opt/hadoop-2.7.3/tmp</value>
         </property>
    ````
-
-   
 
 2. 修改hdfs-site.xml
 
@@ -115,35 +115,29 @@ jdk-8u181-linux-x64.tar.gz和hadoop-2.7.6.tar.gz
    export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
    ````
 
-8. 复制传送文件
+##### 节点传送
 
-   ```shell
-   #复制jdk
-   scp -r /opt/jdk1.8.0_202 slave1:/opt/
-   scp -r /opt/jdk1.8.0_181 slave2:/opt/
-   
-   #复制设置文件
-   scp /etc/profile slave1:/etc/
-   scp /etc/profile slave2:/etc/
+​	复制传送文件
 
-   #复制hadoop
+```shell
+#复制jdk
+scp -r /opt/jdk1.8.0_202 slave1:/opt/
+scp -r /opt/jdk1.8.0_181 slave2:/opt/
+
+#复制设置文件
+scp /etc/profile slave1:/etc/
+scp /etc/profile slave2:/etc/
+
+#复制hadoop
 scp -r /opt/hadoop-2.7.3/ root@slave1:/opt
-   scp -r /opt/hadoop-2.7.3/ root@slave2:/opt
+scp -r /opt/hadoop-2.7.3/ root@slave2:/opt
+```
 
-   
-   ```
-   
-   在每个节点分别执行
-   
-   > Source /etc/profile
-   
-   使profile 生效 
+​	在每个节点分别执行 使profile 生效 
+
+> Source /etc/profile
 
 
-
-### 启动验证集群
-
-​		
 
 ##### 格式化集群
 
@@ -173,13 +167,217 @@ hdfs namenode -format
 
 ​		各节点运行正常后，可访问web页面 8088、50070端口查看job状态 
 
-
+##### 参考文档
 
 参考博客链接1[🔗](https://www.cnblogs.com/taojietaoge/p/10803537.html)
 
 参考博客链接2[🔗](https://www.linuxidc.com/Linux/2017-03/142051.htm)
 
-### 安装Hive 环境
 
 
+### 安装依赖元数据库环境
+
+​	安装Hive需要本地配置元数据库环境。本文选用Mysql 作为远程元数据库，部署在master节点上。
+
+```shell
+yum install mysql
+yum install mysql-devel
+yum install mysql-server
+```
+
+​	发现安装mysql和mysql-devel都成功，但是安装mysql-server失败，报错如下：
+
+<img src='src/2020-12-2-1.png'>
+
+​	这是由于本机环境linux CentOS 7 版本将MySQL数据库软件从默认的程序列表中移除，用mariadb代替了。使用如下解决方法：
+
+```shell
+wget http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
+rpm -ivh mysql-community-release-el7-5.noarch.rpm
+yum install mysql-community-server
+```
+
+​	下载完成后重启数据库服务
+
+```shell
+service mysqld restart
+```
+
+​	初次进入mysql，root账户没有密码
+
+<img src='src/2020-12-2-2.png'>
+
+​	设置root用户密码
+
+```shell
+mysql> set password for 'root'@'localhost' =password('password');
+Query OK, 0 rows affected (0.00 sec)
+```
+
+​	为root用户开放所有库表权限
+
+```shell
+mysql> grant all privileges on *.* to root@'%'identified by 'password';
+```
+
+​	创建 hive 数据库
+
+```sql
+mysql> create database hive;
+```
+
+​	验证配置，进入成功
+
+> [root@master ~]# mysql -u root -p
+> Enter password:
+
+
+
+### Hive安装
+
+​	当前使用版本：hive-2.3.7
+
+​	cd 到资源路径解压，并将解压文件改名为hive-2.3.7
+
+```shell
+tar -zxfv apache-hive-2.3.7-bin.tar.gz
+mv apache-hive-2.3.7-bin hive-2.3.7
+```
+
+##### 修改配置文件	
+
+​	1.配置环境变量：
+
+```shell
+vi /etc/profile
+
+# hive
+export HIVE_HOME=/opt/hive-2.3.7
+export PATH=$HIVE_HOME/bin:$PATH
+export HIVE_CONF_DIR=$HIVE_HOME/conf
+export CLASSPATH=$CLASSPATH:$HIVE_HOME/lib
+```
+
+​	cd  /opt/hive-2.3.7/conf
+
+​	2.修改hive-env.sh 配置：
+
+```shell
+cp hive-env.sh.template hive-env.sh 
+vi hive-env.sh
+
+HADOOP_HOME=/opt/hadoop-2.7.3
+export HIVE_CONF_DIR=/opt/hive-2.3.7/conf
+export HIVE_AUX_JARS_PATH=/opt/hive-2.3.7/lib
+```
+
+​	3.修改hive-site.xml 配置：
+
+```shell
+cp hive-default.xml.template hive-site.xml
+vi hive-site.xml
+```
+
+```xml
+#全局搜索修改以下四个属性
+<property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:mysql://master:3306/hive?createDatabaseIfNotExist=true</value>
+    <description>JDBC connect string for a JDBC metastore</description>
+</property>
+<property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>com.mysql.jdbc.Driver</value>
+    <description>Driver class name for a JDBC metastore</description>
+</property>
+<property>
+    <name>javax.jdo.option.ConnectionUserName</name>
+  	#元数据库username
+    <value>root</value>
+    <description>username to use against metastore database</description>
+</property>
+<property>
+    <name>javax.jdo.option.ConnectionPassword</name>
+  	#元数据库password
+    <value>*******</value>
+    <description>password to use against metastore database</description>
+</property>
+<!--配置缓存目录-->
+<property>
+    <name>hive.exec.local.scratchdir</name>
+    <value>/opt/hive-2.3.7/iotmp</value>
+    <description>Local scratch space for Hive jobs</description>
+</property>
+<property>
+    <name>hive.downloaded.resources.dir</name>
+    <value>/opt/hive-2.3.7/iotmp</value>
+    <description>Temporary local directory for added resources in the remote file system.</description>
+</property>
+
+```
+
+​	4.修改 bin/hive-config.sh
+
+```shell
+export JAVA_HOME=/opt/jdk1.8.0_202
+export HIVE_HOME=/opt/hive-2.3.7
+export HADOOP_HOME=/opt/hadoop-2.7.3
+```
+
+##### 导入元数据库连接jar包	
+
+​	上传mysql-connector-java-5.1.48-bin.jar 包，并将其移动到hive-2.3.7/bin 目录下
+
+```shell
+mv mysql-connector-java-5.1.48 hive-2.3.7/lib/
+```
+
+##### 分发节点
+
+```shell
+scp -r /opt/hive-2.3.7  root@slave1:/opt/
+scp -r /opt/hive-2.3.7  root@slave2:/opt/
+scp -r /opt/hive-2.3.7  root@slave3:/opt/
+```
+
+##### 子节点修改配置	
+
+​	分别在各子节点修改
+
+```xaml
+vi /opt/hive-2.3.7/conf/hive-site.xml
+
+<property>  
+    <name>hive.metastore.uris</name>  
+    <value>thrift://master:9083</value>
+    <description>Thrift URI for the remote metastore. Used by metastore client to connect to remote metastore.</description>  
+</property>
+```
+
+#####	初始化元数据库
+
+```shell
+vi /opt/hive-2.3.7/bin
+
+./schematool -dbType mysql -initSchema
+```
+
+​	得到成功反馈
+
+<img src='src/2020-12-2-3.png'>
+
+##### 启动metastore服务
+
+```shell
+hive –service metastore &
+```
+
+
+​	在 master 节点上运行 jps 应该会有RunJar 进程
+
+​	最后在主节点及子节点运行hive验证
+
+##### 参考文档
+
+​	Hive文档参考链接[🔗](https://my.oschina.net/lvqihua/blog/3037015)
 

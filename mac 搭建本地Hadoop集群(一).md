@@ -1,5 +1,74 @@
 # mac 搭建Hadoop集群（一）
 
+前置环境：
+
+​	本地构建多台虚拟机节点 或 存在多台服务器开放ssh 22端口
+
+### 配置集群节点免密通信
+
+##### 修改主机名
+
+```shell
+vi /etc/hostname
+```
+
+​	部署规划，选择一台主节点与多台子节点。分别修改主机名为master、slave1、slave2	
+
+```shell
+sysctl kernel.hostname=$(cat /etc/hostname)
+```
+
+​	执行上述命令，使主机不用重启hostname 即可生效（需重开shell窗口）
+
+##### 修改host
+
+```shell
+vi /etc/hosts
+```
+
+​	在该文件中标注各节点ip 与 hostname映射关系
+
+<img src='src/2020-12-2-4.png' style='zoom:70%'>
+
+​	并将该配置文件发送给所有节点
+
+```shell
+scp -r /etc/hosts root@slave1:/etc/
+scp -r /etc/hosts root@slave2:/etc/
+scp -r /etc/hosts root@slave3:/etc/
+```
+
+​	测试修改结果
+
+```shell
+ping slave1
+ping slave2
+ping slave3
+```
+
+##### 设置SSH免密登陆
+
+```shell
+ssh-keygen -t rsa
+ssh-copy-id master
+ssh-copy-id slave1
+ssh-copy-id slave2
+ssh-copy-id slave3
+```
+
+​	在各节点执行上述步骤。生成密钥并将其发送给其他节点。
+
+​	测试登陆结果：
+
+```shell
+ssh master
+ssh slave1
+ssh slave2
+ssh slave3
+```
+
+
+
 ### 配置必要java环境
 
 ##### 删除已有jdk
@@ -67,21 +136,3 @@ scp /etc/profile root@slave3:/etc/
 ​	最后，每个节点分别执行source /etc/profile 使其生效。通过java -version 测试是否配置成功：
 
 <img src='src/2020-12-1-4.png' style='zoom:70%'>
-
-
-
-### 安装Hadoop
-
-
-
-##### 上传并解压
-
-​	当前使用版本：hadoop-2.7.3
-
-​	cd 到资源路径解压：
-
-```shell
-tar zxvf hadoop-2.7.3.tar.gz
-```
-
-详见二
