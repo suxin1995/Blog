@@ -1,4 +1,4 @@
-# mac 搭建Hadoop集群（一）
+# mac 搭建Hadoop+Hive集群（一）
 
 前置环境：
 

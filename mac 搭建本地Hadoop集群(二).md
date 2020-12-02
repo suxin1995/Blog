@@ -381,3 +381,66 @@ hive –service metastore &
 
 ​	Hive文档参考链接[🔗](https://my.oschina.net/lvqihua/blog/3037015)
 
+
+
+### 配置Sqoop环境
+
+##### 上传并解压
+
+​	当前使用版本：sqoop-1.4.7.bin__hadoop-2.6.0.tar.gz
+
+​	cd 到资源路径解压：
+
+```shell
+tar zxvf sqoop-1.4.7.bin__hadoop-2.6.0.tar.gz
+```
+
+##### 修改配置文件
+
+​	cd 到解压文件路径  cd  sqoop-1.4.7.bin__hadoop-2.6.0/conf
+
+​	1. 编辑sqoop-env.sh 文件
+
+```shell
+cp sqoop-env-template.sh sqoop-env.sh
+vi sqoop-env.sh
+
+export HADOOP_COMMON_HOME=/opt/hadoop-2.7.3
+export HADOOP_MAPRED_HOME=/opt/hadoop-2.7.3
+export HIVE_HOME=/opt/hive-2.3.7-bin
+```
+
+<img src='src/2020-12-2-5.png'>
+
+​	2. 验证安装
+
+```shell
+cd  sqoop-1.4.7.bin__hadoop-2.6.0/bin
+
+./sqoop version
+```
+
+##### 连接postgresql数据库
+
+​	将下载的postgresql 的jdbc驱动包 以及hive/lib文件夹下 hive-common-2.3.7.jar包置放在sqoop/lib 下
+
+​	连接远端数据库并操作：
+
+​	查看数据库
+
+```shell
+./sqoop list-databases --connect jdbc:postgresql://localhost:5432 --username test --password test
+```
+
+​	查看数据表
+
+```shell
+./sqoop list-tables --connect jdbc:postgresql://localhost:5432/test --username test --password test
+```
+
+​	从pq向hive导入数据
+
+```shell
+./sqoop import --connect jdbc:postgresql://localhost:5432/test「库名」 --username test「数据库用户」 --password test「数据库密码」 --table product_storage「表名」 --hive-import --hive-overwrite --hive-database=test「hive库名」 --m 3「作业节点数」 -- --schema ods_v2「指定schema」
+```
+
