@@ -67,6 +67,8 @@ ssh slave2
 ssh slave3
 ```
 
+<img src='src/2020-11-18-2.png' style='zoom:70%'>
+
 
 
 ### 配置必要java环境
@@ -114,6 +116,10 @@ export PATH=$PATH:$JAVA_HOME/bin:$JAVA_HOME/sbin
 ````
 
 ​	:wq 退出保存后重启该文件使其生效:  source  /etc/profile
+
+<img src='src/2020-11-18-3.png' style='zoom:70%'>
+
+
 
 ##### 节点同步
 

@@ -31,6 +31,10 @@
 
 > vim /Library/Preferences/VMware\ Fusion/networking
 
+<img src="src/2020-11-18-4.png" style="zoom:50%;" />
+
+
+
 显示如图2：
 
 <img src="src/2020-11-20-2.png" style="zoom:50%;" />
