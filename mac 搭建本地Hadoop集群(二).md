@@ -444,3 +444,98 @@ cd  sqoop-1.4.7.bin__hadoop-2.6.0/bin
 ./sqoop import --connect jdbc:postgresql://localhost:5432/test「库名」 --username test「数据库用户」 --password test「数据库密码」 --table product_storage「表名」 --hive-import --hive-overwrite --hive-database=test「hive库名」 --m 3「作业节点数」 -- --schema ods_v2「指定schema」
 ```
 
+
+
+# 配置spark环境
+
+前置环境：
+
+​	已在前文配置hadoop集群服务并启用
+
+##### 解压资源
+
+```shell
+tar xvzf spark-2.4.7-bin-hadoop2.7.tgz
+tar xvzf scala-2.11.12.tgz
+```
+
+##### 设置环境变量
+
+```shell
+#scala
+export SCALA_HOME=/opt/scala-2.11.12
+export PATH=$SCALA_HOME/bin:$PATH
+
+#spark
+export SPARK_HOME=/opt/spark-2.4.7-bin-hadoop2.7
+export PATH=$SPARK_HOME/bin:$PATH
+```
+
+##### 修改配置文件
+
+```shell
+cd /opt/spark-2.4.7-bin-hadoop2.7/conf
+
+cp spark-env.sh.template spark-env.sh
+cp slaves.template	slaves
+
+```
+
+​	配置子节点 
+
+> vi slaves
+>
+> #输入子节点host
+>
+> slave1
+>
+> slave2
+>
+> slave3
+
+​	增加环境路径
+
+```shell
+vi spark-env.sh
+
+export JAVA_HOME=/opt/jdk1.8.0_202
+export SPARK_DIST_CLASSPATH=$(/opt/hadoop-2.7.3/bin/hadoop classpath)
+export HADOOP_CONF_DIR=/opt/hadoop-2.7.3/etc/hadoop
+export HADOOP_HOME=/opt/hadoop-2.7.3/
+
+export SPARK_MASTER_HOST=master
+export SPARK_MASTER_IP=master
+export SPARK_WORKER_MEMORY=6g #子节点分配使用内存
+
+export SPARK_WORKER_CORES=3 #子节点数
+export SCALA_HOME=/opt/scala-2.11.12
+```
+
+##### 适配hive
+
+​	为了将hive平滑过渡到spark sql，使spark可读取来自hive表数据源进行计算。
+
+​	为spark配置hive的信息：
+
+​		1.将hive/conf目录下的hive-site.xml文件拷贝到spark/conf目录下，且修改参数“hive.metastore.schema.verification”的值为“false”。避免进入spark客户端报版本不匹配错误。
+
+​		2.将hive/lib中的mysql-connector-java驱动包拷贝到spark/jars中		
+
+##### 启动集群
+
+​	启动spark集群，使用start-all.sh命令。可在子节点通过jps查看，节点是否响应。
+
+<img src='src/2020-12-4-1.png'>
+
+##### 启动spark-sql
+
+​	进入spark/bin下启动spark-sql ，查询执行sql
+
+```shell
+spark-sql --master local[2] --jars jar/mysql-connector-java-5.1.48-bin.jar
+
+spark-sql> 
+```
+
+​	
+
