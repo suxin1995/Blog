@@ -1,4 +1,4 @@
-​	重新搭建Mysql环境后，root账号登陆正常，而重新创建的新用户 'test‘始终无法正常登陆到数据库中。
+	重新搭建Mysql环境后，root账号登陆正常，而重新创建的新用户 'test‘始终无法正常登陆到数据库中。
 
 ```shell
 mysql -u test -p
@@ -21,6 +21,10 @@ ERROR 1045 (28000): Access denied for user 'test'@'localhost' (using password: Y
 use mysql   #选择mysql库
 
 delete from user where User='';  #删除账号为空的行
+
+#授权用户外联权限
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'mypwd' WITH GRANT OPTION;
+
 flush privileges;  #刷新权限
 exit  #退出mysql
 ```

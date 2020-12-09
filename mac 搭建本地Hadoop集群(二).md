@@ -99,7 +99,7 @@ tar zxvf hadoop-2.7.3.tar.gz
 
    在文件中标注可用节点
 
-   ​	<img src="/Users/su/Library/Application Support/typora-user-images/image-20201127175948896.png" style="zoom:50%;" />
+   ​	<img src='src/2020-12-1-6.png'>
 
 7. 修改环境配置文件
 
