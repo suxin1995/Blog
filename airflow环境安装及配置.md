@@ -1,4 +1,4 @@
-​	根据本机实际情况对操作做适当删减。
+	根据本机实际情况对操作做适当删减。
 
 本机当前环境：centos7  自带python2.7
 
@@ -215,6 +215,7 @@ airflow initdb
 #启动组件：
 airflow webserver -D
 #airflow scheduler -D
+#遇到bug尚未解决 守护进程运行scheduler会提示过期未检测心跳 直接运行无碍
 ```
 
 
@@ -222,4 +223,70 @@ airflow webserver -D
 参考文档链接[🔗](https://tech.cuixiangbin.com/?p=1380)
 
 修改中国时区[🔗](https://blog.csdn.net/Crazy__Hope/article/details/83688986)
+
+
+
+### Airflow接入钉钉报警
+
+​	打开钉钉客户端-> 机器人管理。创建自定义机器人🤖️获取webhook。安全设置图方便选择了  关键词方式。
+
+<img src="src/2020-12-9-1.png" style="zoom:50%;" />
+
+<img src="src/2020-12-9-2.png" style="zoom:50%;" />
+
+<img src="src/2020-12-9-3.png" style="zoom:50%;" />
+
+​	在Airflow web管理界面创建新连接
+
+<img src="src/2020-12-10-1.png" style="zoom:50%;" />
+
+<img src="src/2020-12-10-2.png" style="zoom:50%;" />
+
+​	保存后编写调用代码
+
+```python
+from airflow.contrib.operators.dingding_operator import DingdingOperator
+
+def failure_callback_dingding(self,context):
+  message = '自动报警\n  AIRFLOW TASK FAILURE TIPS:\n' \
+  'DAG:    {}\n' \
+  'TASKS:  {}\n' \
+  'Reason: {}\n' \
+  .format(context['task_instance'].dag_id,
+          context['task_instance'].task_id,
+          context['exception'])
+  return DingdingOperator(
+    task_id='dingding_failure_callback',
+    dingding_conn_id='dingding_talk',
+    message_type='text',
+    message=message,
+    at_mobiles=[self.phone],
+    # at_all=True,
+  ).execute(context)
+
+default_args = {
+    'owner': airflow,
+    'depends_on_past': False,
+    'start_date': datetime(2020, 12, 9),
+    'on_failure_callback':config.failure_callback,
+}
+
+dag = DAG(
+    dag_id=dag_id,  # dag_id
+    default_args=default_args,  # 指定默认参数
+    schedule_interval=timedelta(minutes=5)
+)
+```
+
+​	经验证接入成功
+
+<img src="src/2020-12-10-3.png" style="zoom:50%;" />
+
+
+
+### Airflow接入邮箱报警
+
+
+
+
 
