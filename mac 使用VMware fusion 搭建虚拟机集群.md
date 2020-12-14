@@ -1,6 +1,6 @@
-# mac 环境下使用VMware fusion 搭建虚拟机联通网络
+# mac 环境下使用VMware fusion 搭建虚拟机集群：联通网络+外网映射
 
-​		最近在调研Flink流处理的相关解决方案效率，想将其作为套件服务嵌入Hadoop生态圈中使用。寻找多台服务器分布测试显然不现实，因此在本地模拟生产环境构建多个虚拟机，依次搭建Hadoop集群。本文系列记录各依赖环境安装踩坑过程。
+​		最近在调研Flink流处理的相关解决方案效率，想将其作为套件服务嵌入Hadoop生态圈中使用。寻找多台服务器分布测试显然不现实，因此在本地模拟生产环境构建多个虚拟机，依次搭建Hadoop-Hive集群。本文系列记录各依赖环境安装踩坑过程。
 
 - 当前环境:
   -  macOS Big Sur 
@@ -8,7 +8,6 @@
 - 使用工具：
   - VMware Fusion 12  下载链接[🔗](https://www.macwk.com/soft/vmware-fusion)     
   -  Royal TSX  下载链接[🔗](https://www.royalapps.com/ts/mac/download)
-  - Hadoop 3.3.0 下载链接[🔗](http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-3.3.0/) 
 
 ### 使用VMware fusion 搭建虚拟机并配置网络	
 
